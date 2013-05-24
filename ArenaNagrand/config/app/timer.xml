@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:lang="http://www.springframework.org/schema/lang"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.0.xsd
+		http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+<!--
+/**
+ * 格式：
+ *      位置              时间域名            允许值             允许的特殊字符
+ *       1            秒                0-59            , - * /
+ *       2           分钟              0-59            , - * /
+ *       3           小时              0-23            , - * /
+ *       4           日期              1-31            , - * ? / L W C 
+ *       5           月份              1-12            , - * /
+ *       6           星期              1-7             , - * ? / L C #
+ *       7        年(可选)    空值1970-2099    , - * /
+ */      
+ -->
+	<!-- 定义调度作业的触发器 -->
+	<!-- 
+	<bean id="UpdataSpecialOneShop" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass" value="com.cwa.petserver.timer.UpdataSpecialOneShop" />
+			</bean>
+		</property>
+		<property name="cronExpression" value="*/1 * * * * ? " />
+	</bean>
+	
+	<bean id="UpdataSpecialTwoShop" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass" value="com.cwa.petserver.timer.UpdataSpecialTwoShop" />
+			</bean>
+		</property>
+		<property name="cronExpression" value="*/2 * * * * ? " />
+	</bean>
+	
+	<bean id="UpdataSpecialThrShop" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass" value="com.cwa.petserver.timer.UpdataSpecialThrShop" />
+			</bean>
+		</property>
+		<property name="cronExpression" value="*/3 * * * * ? " />
+	</bean>
+	-->
+	<!-- 
+	<bean id="UpdataPushFriends" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass" value="com.cwa.petserver.timer.UpdataPushFriends" />
+			</bean>
+		</property>
+		<property name="cronExpression" value="*/4 * * * * ? " />
+	</bean>
+	-->
+
+	<!-- 每一分钟执行一次，扫描DB，将每等级的活跃玩家扫描出来 -->
+	<!-- 
+	<bean id="ScanActiveUser" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass" value="com.cwa.petserver.timer.ScanDBActiveUser" />
+			</bean>
+		</property>
+		<property name="cronExpression" value="0 * * * * ? " />
+	</bean>
+	-->
+	
+	<!-- 每一分钟保存所有的竞技场信息 -->
+	<bean id="lazySaving" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass" value="com.cwa.nagrand.timer.LazySaving" />
+			</bean>
+		</property>
+		<property name="cronExpression" value="0 0/1 * * * ? " />
+	</bean>
+	
+	<!-- 执行实际的调度 -->
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref local="lazySaving" />
+			</list>
+		</property>
+	</bean>
+
+</beans>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+<!-- 
+    <bean id="httpServerConfig" class="com.cwa.httpserver.GameServerConfig">
+        <property name="serverPort" value="8080"/>
+        <property name="messageSuffixes">
+            <list>
+                 <value>Message</value>
+                 <value>Request</value>
+            </list>
+        </property>
+        <property name="messagePackages" value="com.cwa"/>
+        <property name="actionSuffixes" value="Action"/>
+        <property name="actionPackages" value="com.cwa"/>
+    </bean>
+    <bean id="httpServer" class="com.cwa.httpserver.GameJettyServer">
+        <constructor-arg ref="httpServerConfig"/>
+    </bean>
+    
+-->
+    
+    <bean id="tcpServerConfig" class="com.cwa.minaserver.config.GameServerConfig">
+        <property name="serverPort" value="11224"/>
+        <property name="messageSuffixes">
+            <list>
+                 <value>Message</value>
+                 <value>Request</value>
+            </list>
+        </property>
+        <property name="messagePackages" value="com.cwa"/>
+        <property name="actionSuffixes" value="Action"/>
+        <property name="actionPackages" value="com.cwa"/>
+    </bean>
+    <bean id="tcpServer" class="com.cwa.minaserver.GameMsgServer" init-method="start">
+        <constructor-arg ref="tcpServerConfig"/>
+    </bean>
+    
+</beans>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cwa.negrand.db.arena.ArenaDAO">
+	<select id="getAllIds" resultType="String">
+		SELECT arenaId FROM arena
+	</select>
+	<select id="get" parameterType="String" resultType="Arena">
+		SELECT * FROM arena WHERE arenaId = #{arenaId}
+	</select>
+	<insert id="add" parameterType="Arena">
+		INSERT INTO arena(arenaId, content) VALUES (#{arenaId}, #{content})
+	</insert>
+	<update id="update" parameterType="Arena">
+		UPDATE arena SET content=#{content} where arenaId=#{arenaId}
+	</update>
+</mapper>

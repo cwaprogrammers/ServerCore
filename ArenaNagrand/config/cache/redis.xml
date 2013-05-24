@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:lang="http://www.springframework.org/schema/lang"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.0.xsd
+		http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+	<!-- 配置redis -->
+	<!-- POOL配置 -->
+	<bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+		<property name="maxActive" value="1000" />
+		<property name="maxIdle" value="1000" />
+		<property name="maxWait" value="2000" />
+		<property name="testOnBorrow" value="true" />
+	</bean>
+
+	<!-- jedis shard信息配置 -->
+	<bean id="jedis.shardInfo1" class="redis.clients.jedis.JedisShardInfo">
+		<constructor-arg index="0" value="172.16.1.21" />
+		<constructor-arg index="1" value="6380" />
+		<constructor-arg index="2" value="172.16.1.21" /><!-- name*weight:来负载均衡 -->
+	</bean>
+	
+	<bean id="jedis.shardInfo2" class="redis.clients.jedis.JedisShardInfo">
+		<constructor-arg index="0" value="172.16.1.22" />
+		<constructor-arg index="1" value="6380" />
+		<constructor-arg index="2" value="172.16.1.22" /><!-- name*weight:来负载均衡 -->
+	</bean>
+
+	<!-- jedis shard pool配置 -->
+	<bean id="shardedJedisPool" class="redis.clients.jedis.ShardedJedisPool">
+		<constructor-arg index="0" ref="jedisPoolConfig" />
+		<constructor-arg index="1">
+			<list>
+				<ref bean="jedis.shardInfo1" />
+			</list>
+		</constructor-arg>
+		<constructor-arg index="2" ref="defaultPattern" />
+	</bean>
+	<bean id="defaultPattern" class="com.cwa.gamecore.cache.PatternImpl" factory-method="getDefaultPattern"></bean>	
+</beans>
