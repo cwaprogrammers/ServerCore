@@ -3,34 +3,45 @@ package com.cwa.protobuf;
 import com.cwa.gamecore.io.GameInput;
 import com.cwa.gamecore.io.GameOutput;
 import com.cwa.gamecore.message.GameMessage;
+import com.cwa.gamecore.util.StringUtil;
 import com.google.protobuf.CodedInputStream;
-import com.google.protobuf.GeneratedMessageLite;
+import com.google.protobuf.MessageLite;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import org.apache.log4j.Logger;
 
+/**
+ * GameMessage实现。内部封装了MessageLite。
+ */
 public class ProtobufGameMessage implements GameMessage {
 
+    private static final Logger logger = Logger.getLogger(ProtobufGameMessage.class);
     private static final int PROTOBUF_MSG_ID = 100;
     
     int msgId;
-    private GeneratedMessageLite message;
+    private MessageLite message;
     
     @Override
     public int getCommandId() {
         return PROTOBUF_MSG_ID;
     }
 
-    public GeneratedMessageLite getMessage() {
+    public MessageLite getMessage() {
         return message;
     }
 
-    public void setMessage(GeneratedMessageLite message) {
+    public void setMessage(MessageLite message) {
         this.message = message;
     }
 
     @Override
     public void decodeBody(GameInput in) {
         byte[] data = in.getBytes();
+        if (logger.isDebugEnabled()) {
+            logger.debug("Decode protobuf request:");
+            logger.debug(StringUtil.toDebugString(data));
+        }
+        
         try {
             // get msg id
             msgId = readMsgId(data);
@@ -38,7 +49,7 @@ public class ProtobufGameMessage implements GameMessage {
             // parse msg
             message = ProtobufSupport.parseRequest(msgId, data);
         } catch (IOException e) {
-            throw new RuntimeException("fail to decode request", e);
+            throw new ProtobufException("Failed to decode request!", e);
         }
     }
     
@@ -53,9 +64,16 @@ public class ProtobufGameMessage implements GameMessage {
         try {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             message.writeTo(os);
-            out.putBytes(os.toByteArray());
+            
+            byte[] data = os.toByteArray();
+            out.putBytes(data);
+            
+            if (logger.isDebugEnabled()) {
+                logger.debug("Encode protobuf response:");
+                logger.debug(StringUtil.toDebugString(data));
+            }
         } catch (IOException e) {
-            throw new RuntimeException("fail to encode response", e);
+            throw new ProtobufException("Failed to encode response!", e);
         }
     }
 
@@ -63,8 +81,15 @@ public class ProtobufGameMessage implements GameMessage {
     public String toString() {
         return "{ProtobufGameMessage"
                 + " msgId=" + msgId
-                + " proto=" + message.getClass().getSimpleName()
+                + " proto=" + (message == null ? null : message.getClass().getSimpleName())
                 + "}";
+    }
+    
+    // 工厂方法
+    public static ProtobufGameMessage wrap(MessageLite msg) {
+        ProtobufGameMessage wrapper = new ProtobufGameMessage();
+        wrapper.setMessage(msg);
+        return wrapper;
     }
     
 }

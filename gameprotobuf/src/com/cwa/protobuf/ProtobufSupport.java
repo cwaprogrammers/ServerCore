@@ -1,6 +1,6 @@
 package com.cwa.protobuf;
 
-import com.google.protobuf.GeneratedMessageLite;
+import com.google.protobuf.MessageLite;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Parser;
 import java.util.HashMap;
@@ -17,11 +17,21 @@ public abstract class ProtobufSupport {
     }
     
     public static ProtobufAction getAction(int msgId) {
-        return actions.get(msgId);
+        ProtobufAction action = actions.get(msgId);
+        if (action == null) {
+            throw new ProtobufException("Unknown protobuf msg: " + msgId);
+        }
+        
+        return action;
     }
     
-    public static GeneratedMessageLite parseRequest(int msgId, byte[] data) throws InvalidProtocolBufferException {
-        return (GeneratedMessageLite) parsers.get(msgId).parseFrom(data);
+    public static MessageLite parseRequest(int msgId, byte[] data) throws InvalidProtocolBufferException {
+        Parser parser = parsers.get(msgId);
+        if (parser == null) {
+            throw new ProtobufException("Unknown protobuf msg: " + msgId);
+        }
+        
+        return (MessageLite) parser.parseFrom(data);
     }
     
 }

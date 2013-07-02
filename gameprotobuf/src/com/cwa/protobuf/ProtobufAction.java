@@ -1,10 +1,9 @@
 package com.cwa.protobuf;
 
-import com.cwa.gamecore.session.GameSession;
-import com.google.protobuf.GeneratedMessageLite;
+import com.google.protobuf.MessageLite;
 
-public interface ProtobufAction<T extends GeneratedMessageLite> {
+public interface ProtobufAction<T extends MessageLite> {
     
-    public GeneratedMessageLite execute(GameSession session, T req);
+    public MessageLite execute(ProtobufGameSession session, T req);
     
 }
