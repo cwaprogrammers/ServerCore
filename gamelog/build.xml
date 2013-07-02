@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="gamelog" default="buildAndUpload" basedir=".">
+
+	<!-- 环境变量 -->
+	<property environment="env"/>
+	<property name="build" value="build"/>
+	<property name="dist" value="dist"/>
+	<property name="config" value="config"/>
+	<property name="src" value="src"/>
+	<property name="version" value="1.0"/>
+
+	<property name="194address" value="172.16.1.194:/usr/gamelog" />
+	<property name="194user" value="root" />
+	<property name="194password" value="cwaimy" />
+
+	<tstamp>
+		<format property="DSTAMP" pattern="MM/dd/yyyy hh:mm:ss" unit="hour"/>
+	</tstamp>
+	<echo>${DSTAMP}</echo>
+
+	<path id="classpath">
+		<fileset dir=".">
+			<include name="lib/*.jar"/>
+		</fileset>
+	</path>
+
+	<target name="clean">
+		<delete dir="${build}"/>
+		<delete dir="${dist}"/>
+	</target>
+
+	<target name="init">
+		<mkdir dir="${build}"/>
+		<mkdir dir="${build}/META-INF"/>
+		<mkdir dir="${dist}"/>
+		<tstamp/>
+		<echo message="${DSTAMP}">
+		</echo>
+
+		<uptodate property="gamelog.uptodate" targetfile="${dist}/gamelog.jar">
+			<srcfiles dir="${src}" includes="*"/>
+		</uptodate>
+
+	</target>
+	<target name="make-server" unless="gamelog.uptodate" depends="create-manifest">
+		<echo message="正在进行编译...">
+		</echo>
+		<javac encoding="utf-8" destdir="${build}"  >
+			<src path="${src}"/>
+			<classpath refid="classpath"/>
+		</javac>
+		<copy todir="${build}">
+			<fileset dir="${src}">
+				<exclude name="**/*.java"/>
+			</fileset>
+		</copy>
+		<copy todir="${dist}/lib">
+			<fileset dir="lib">
+				<include name="**/*.jar"/>
+			</fileset>
+		</copy>
+		<copy todir="${dist}/config">
+			<fileset dir="config">
+				<include name="**/*"/>
+			</fileset>
+		</copy>
+		<copy todir="${dist}" file="startgamelog.sh" />
+		<copy todir="${dist}" file="stopgamelog.sh" />
+		<jar jarfile="${dist}/lib/gamelog.jar" manifest="${build}/META-INF/MANIFEST.MF" basedir="${build}">
+			<include name="**/*"/>
+		</jar>
+	</target>
+	<target name="create-manifest" depends="init">
+		<manifest file="${build}/META-INF/MANIFEST.MF">
+			<attribute name="Built-By" value="Landu"/>
+			<attribute name="Built-On" value="${DSTAMP}"/>
+			<attribute name="Main-Class" value="com.cwa.log.manage.LogHttpServer"/>
+		</manifest>
+	</target>
+
+	<target name="all" depends="clean,init,make-server"/>
+
+
+	<target name="buildAndUpload" description="打包上传" depends="all,upload">
+	</target>
+	<target name="upload"  description="上传">
+		<echo message="删除194部署文件..."/>
+		<sshexec host="172.16.1.194" username="${194user}" password="${194password}" command="rm -rdf /usr/gamelog" trust="true" verbose="true"/>
+		<sshexec host="172.16.1.194" username="${194user}" password="${194password}" command="mkdir /usr/gamelog" trust="true" verbose="true"/>
+		<echo message="删除194部署文件完成"/>
+
+		<echo message="开始上传文件...."/>
+		<scp todir="${194user}:${194password}@${194address}" trust="true" verbose="true">
+			<fileset dir="${dist}"/>
+		</scp>
+		<echo message="完成上传文件"/>
+	</target>
+	<target name="uploadStartSh"  description="上传脚本">
+		<echo message="删除startgamelog.sh文件..."/>
+		<sshexec host="172.16.1.194" username="${194user}" password="${194password}" command="rm -rf /usr/gamelog/startgamelog.sh" trust="true" verbose="true"/>
+		<echo message="上传startgamelog.sh文件..."/>
+		<scp file="startgamelog.sh" todir="${194user}:${194password}@${194address}" trust="true" verbose="true">
+		</scp>
+		<echo message="上传startgamelog.sh文件完成！"/>
+	</target>
+
+	<target name="start">
+		<echo message="start server..." />
+		<sshexec host="172.16.1.194" username="${194user}" password="${194password}" command="cd /usr/gamelog;sh startgamelog.sh" trust="true" verbose="true" />
+		<echo message="done!pls enjoy it!" />
+	</target>
+
+	<target name="stop">
+		<echo message="stop server..." />
+		<sshexec host="172.16.1.194" username="${194user}" password="${194password}" command="cd /usr/gamelog;sh stopgamelog.sh" trust="true" verbose="true" />
+		<echo message="done!server stop!" />
+	</target>
+
+</project>

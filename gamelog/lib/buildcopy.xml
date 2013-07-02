@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="aon-server" default="release" basedir=".">
+    <!-- set global properties for this build -->
+	<property name="version" value="0.0.2"/>
+    <property name="src" location="src"/>
+    <property name="build" location="build"/>
+    <property name="dist" location="dist"/>
+    <property name="release" location="release"/>
+    <property name="test.src" location="test"/>
+    <property name="test.build" location="build/test"/>
+    <property name="test.reports" location="build/test/reports"/>
+
+    <path id="lib.path">
+        <fileset dir="lib">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+  
+    <path id="test.lib.path" location="${dist}">
+        <fileset dir="${dist}/lib">
+            <include name="**/*.jar"/>
+        </fileset>
+        <fileset dir="lib-test">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+  
+    <target name="init">
+        <!-- Create the time stamp -->
+        <tstamp/>
+        <!-- Create the build directory structure used by compile -->
+        <mkdir dir="${build}/classes"/>
+    </target>
+
+    <target name="compile" depends="init" description="compile the source">
+        <!-- Compile the java code from ${src} into ${build} -->
+        <javac srcdir="${src}"
+               destdir="${build}/classes"
+               source="1.6"
+               target="1.6"
+			   debug="on"
+               encoding ="utf-8">
+            <classpath refid="lib.path"/>
+        </javac>
+    </target>
+
+    <target name="dist" depends="compile" description="generate the distribution">
+        <!-- Create the distribution directory -->
+        <mkdir dir="${dist}/lib"/>
+
+        <!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
+        <jar jarfile="${dist}/lib/${ant.project.name}-${version}.jar" basedir="${build}/classes" />
+        
+        <copy todir="${dist}/lib">
+            <fileset dir="lib">
+                <include name="**/*.jar"/>
+            </fileset>
+        </copy>
+        <copy todir="${dist}">
+			<fileset dir="${src}" includes="sql/**"/>
+            <fileset dir="${src}" includes="config/**"/>
+            <fileset dir="${src}" includes="log4j.xml"/>
+        </copy>
+        <copy todir="${dist}">
+            <fileset dir="bin" includes="**"/>
+        </copy>
+        
+        <chmod file="${dist}/start.sh" perm="u+x"/>
+        <chmod file="${dist}/stop.sh" perm="u+x"/>
+    </target>
+	
+	<!-- 仅测试用!!! -->
+	<target name="dist2" depends="dist">
+		<copy todir="${dist}/lib">
+            <fileset dir="lib-debug">
+                <include name="**/*.jar"/>
+            </fileset>
+        </copy>
+	</target>
+
+    <target name="unit-test-init">
+        <mkdir dir="${test.build}/classes"/>
+        <mkdir dir="${test.reports}"/>
+    </target>
+  
+    <target name="compile-tests" depends="dist, unit-test-init" description="compile unit tests" >
+        <javac srcdir="${test.src}" destdir="${test.build}/classes" encoding ="utf-8">
+            <classpath refid="test.lib.path"/>
+        </javac>
+    </target>
+  
+    <target name="create-db" description="Create Database and Tables" >
+		<!-- aon1-->
+        <sql classpathref="lib.path"
+				driver="com.mysql.jdbc.Driver"
+				url="jdbc:mysql://localhost:3311/"
+				userid="root" password="">
+            
+            <transaction src="${src}/sql/create_db.sql"/>
+			<transaction>
+                ALTER TABLE `users` AUTO_INCREMENT = 10000001;
+				INSERT INTO `ladders` (ladder) values (NULL);
+                INSERT INTO `ladders` (ladder) values (NULL);
+                INSERT INTO `ladders` (ladder) values (NULL);
+                INSERT INTO `ladders` (ladder) values (NULL);
+                INSERT INTO `ladders` (ladder) values (NULL);
+            </transaction>
+        </sql>
+		<!-- aon2-->
+		<sql classpathref="lib.path"
+				driver="com.mysql.jdbc.Driver"
+				url="jdbc:mysql://localhost:3312/"
+				userid="root" password="">
+            
+            <transaction src="${src}/sql/create_db.sql"/>
+			<transaction>
+                ALTER TABLE `users` AUTO_INCREMENT = 20000001;
+				INSERT INTO `ladders` (ladder) values (NULL);
+                INSERT INTO `ladders` (ladder) values (NULL);
+                INSERT INTO `ladders` (ladder) values (NULL);
+                INSERT INTO `ladders` (ladder) values (NULL);
+                INSERT INTO `ladders` (ladder) values (NULL);
+            </transaction>
+        </sql>
+    </target>
+    
+    <target name="run-tests" depends="compile-tests, create-db">
+        <junit printsummary="yes" haltonfailure="yes" showoutput="yes">
+            <classpath refid="test.lib.path"/>
+            <classpath>
+                <pathelement location="${test.build}/classes"/>
+            </classpath>
+
+            <formatter type="plain"/>
+
+            <batchtest fork="false" todir="${test.reports}">
+                <fileset dir="${test.src}">
+                    <include name="**/*Test.java"/>
+                    <!--<exclude name="**/AllTests.java"/>-->
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
+    
+    <target name="release" depends="run-tests">
+        <mkdir dir="${release}"/>
+        <zip destfile="${release}/${ant.project.name}-${version}-${DSTAMP}.zip" basedir="${dist}"/>
+    </target>
+
+    <target name="clean" description="clean up" >
+        <!-- Delete the ${build} and ${dist} directory trees -->
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+        <delete dir="${release}"/>
+		<delete dir="logs"/>
+    </target>
+</project>

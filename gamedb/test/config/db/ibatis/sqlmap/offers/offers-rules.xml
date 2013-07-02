@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE rules SYSTEM "rules.dtd">
+<rules>
+<rule>
+    <namespace>com.alibaba.cobar.client.entities.Offer</namespace>
+    <shardingExpression><![CDATA[mod.apply(memberId)==0]]></shardingExpression>
+    <shards>partition1</shards>
+  </rule>
+  <rule>
+    <namespace>com.alibaba.cobar.client.entities.Offer</namespace>
+    <shardingExpression><![CDATA[mod.apply(memberId)==1]]></shardingExpression>
+    <shards>partition2</shards>
+  </rule>
+  <rule>
+    <sqlmap>com.alibaba.cobar.client.entities.Offer.findAll</sqlmap>
+    <shards>partition1, partition2</shards>
+  </rule>
+  <!-- 需要指明shards定义的数据源 -->
+  <rule>
+    <sqlmap>com.alibaba.cobar.client.entities.Offer.findByMemberIdRange</sqlmap>
+    <shards>partition1</shards>
+  </rule>
+  <!-- 需要指明shards定义的数据源 -->
+  <rule>
+    <sqlmap>com.alibaba.cobar.client.entities.Offer.findAllWithOrderByOnSubject</sqlmap>
+    <shards>partition1, partition2</shards>
+  </rule>
+  <!-- 前面已经定义了insert规则,在这里定义shards已经不起作用 -->
+  <rule>
+    <sqlmap>com.alibaba.cobar.client.entities.Offer.batchInsert</sqlmap>
+    <shardingExpression><![CDATA[mod.apply(memberId)==0]]></shardingExpression>
+    <shards>partition1</shards>
+  </rule>
+  </rules>

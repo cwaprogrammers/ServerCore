@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE rules SYSTEM "rules.dtd">
+<rules>
+  <rule>
+    <namespace>com.alibaba.cobar.client.entities.Tweet</namespace>
+    <shards>partition1</shards>
+  </rule>
+  <rule>
+    <namespace>com.alibaba.cobar.client.entities.Follower</namespace>
+    <shards>partition2</shards>
+  </rule>
+  
+  <rule>
+    <namespace>com.alibaba.cobar.client.entities.Follower</namespace>
+    <shardingExpression><![CDATA[name.startsWith("A")]]></shardingExpression>
+    <shards>partition1</shards>
+  </rule>
+  <rule>
+    <namespace>com.alibaba.cobar.client.entities.Follower</namespace>
+    <shardingExpression><![CDATA[name.startsWith("D")]]></shardingExpression>
+    <shards>partition2</shards>
+  </rule>
+  
+  <rule>
+    <namespace>com.alibaba.cobar.client.entities.Offer</namespace>
+    <shardingExpression><![CDATA[mod.apply(memberId)==0]]></shardingExpression>
+    <shards>partition1</shards>
+  </rule>
+  <rule>
+    <namespace>com.alibaba.cobar.client.entities.Offer</namespace>
+    <shardingExpression><![CDATA[mod.apply(memberId)==1]]></shardingExpression>
+    <shards>partition2</shards>
+  </rule>
+  <rule>
+    <sqlmap>com.alibaba.cobar.client.entities.Offer.findAll</sqlmap>
+    <shards>partition1, partition2</shards>
+  </rule>
+  <rule>
+    <sqlmap>com.alibaba.cobar.client.entities.Offer.findByMemberIdRange</sqlmap>
+    <shards>partition1</shards>
+  </rule>
+  <rule>
+    <sqlmap>com.alibaba.cobar.client.entities.Offer.findAllWithOrderByOnSubject</sqlmap>
+    <shards>partition1, partition2</shards>
+  </rule>
+  <rule>
+    <sqlmap>com.alibaba.cobar.client.entities.Offer.batchInsert</sqlmap>
+    <shardingExpression><![CDATA[mod.apply(memberId)==0]]></shardingExpression>
+    <shards>partition1</shards>
+  </rule>
+  
+  <rule>
+    <sqlmap>com.alibaba.cobar.client.entities.Follower.finaByName</sqlmap>
+    <shards>partition2</shards>
+  </rule>
+  <rule>
+    <sqlmap>com.alibaba.cobar.client.entities.Follower.findAll</sqlmap>
+    <shards>partition1, partition2</shards>
+  </rule>
+ 
+  
+  <rule>
+		<sqlmap>com.alibaba.cobar.client.entities.Follower.create</sqlmap>
+		<shardingExpression><![CDATA[name.startsWith("A")]]></shardingExpression>
+		<shards>partition1</shards>
+	</rule>
+	<rule>
+		<sqlmap>com.alibaba.cobar.client.entities.Follower.create</sqlmap>
+		<shardingExpression><![CDATA[name.startsWith("D")]]></shardingExpression>
+		<shards>partition2</shards>
+	</rule>
+	<rule>
+		<sqlmap>com.alibaba.cobar.client.entities.Follower.batchInsert</sqlmap>
+		<shardingExpression><![CDATA[name.startsWith("A")]]></shardingExpression>
+		<shards>partition1</shards>
+	</rule>
+	<rule>
+		<sqlmap>com.alibaba.cobar.client.entities.Follower.batchInsert</sqlmap>
+		<shardingExpression><![CDATA[name.startsWith("D")]]></shardingExpression>
+		<shards>partition2</shards>
+	</rule>
+</rules>

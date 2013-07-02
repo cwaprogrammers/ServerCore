@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="cwa-gameconfig" default="run-tests" basedir=".">
+    <import file="../build-impl.xml"/>
+	<property name="version" value="2.1.1"/>
+</project>

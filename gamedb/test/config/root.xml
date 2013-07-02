@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <!-- 数据源配置 -->
+	<import resource="db/spring/datasources-applicationcontext.xml" />
+	<!-- db处理层配置 -->
+	<import resource="db/spring/db-applicationcontext.xml" />
+	<!-- 分库分表路由配置 -->
+	<import resource="db/spring/router-applicationcontext.xml" /> 
+	<!-- dao配置 -->
+	<import resource="db/ibatis/user-dao.xml"/> 
+	
+	<!-- 配置cache：redis -->
+	<import resource="cache/redis.xml"/>  
+	<!-- 网络层配置 -->
+	<import resource="net/net.xml"/>
+</beans>

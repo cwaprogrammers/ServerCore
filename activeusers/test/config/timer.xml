@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+<!--
+/**
+ * 格式：
+ *      位置              时间域名            允许值             允许的特殊字符
+ *       1            秒                0-59            , - * /
+ *       2           分钟              0-59            , - * /
+ *       3           小时              0-23            , - * /
+ *       4           日期              1-31            , - * ? / L W C 
+ *       5           月份              1-12            , - * /
+ *       6           星期              1-7             , - * ? / L C #
+ *       7        年(可选)    空值1970-2099    , - * /
+ */      
+ -->
+	<!-- 定义调度作业的触发器 -->
+
+    <bean id="activeUserManager" class="com.cwa.qiji.ActiveUserManager">
+        <constructor-arg>
+            <bean class="com.cwa.qiji.ActiveUserManagerConfig">
+                <property name="minLevel" value="1"/>
+                <property name="maxLevel" value="60"/>
+                <property name="levelsPerGroup" value="5"/>
+                <property name="usersPerGroup" value="1000"/>
+                <property name="dataFile" value="activeUsers.data"/>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+	<!-- （每分钟）保存活跃玩家 -->
+	<bean id="saveActiveUsers" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass" value="com.cwa.qiji.ActiveUserSaveJob" />
+                <property name="jobDataAsMap">
+                    <map>
+                        <entry key="activeUserManager">
+                            <ref bean="activeUserManager"/>
+                        </entry>
+                    </map>
+                </property>
+			</bean>
+		</property>
+		<property name="cronExpression" value="0 * * * * ? " />
+	</bean>
+    
+	<!-- 执行实际的调度 -->
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref local="saveActiveUsers" />
+			</list>
+		</property>
+	</bean>
+</beans>

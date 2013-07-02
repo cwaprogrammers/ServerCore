@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+    <!--<bean id="secretProvider" class="com.cwa.qiji.beelzebub.game.BeelzebubSecretProvider">
+        <constructor-arg ref="userDao"/>
+    </bean>-->
+    
+    <!--<bean id="actionDispatcher" class="com.cwa.msg.SmartActionDispatcher">
+        <property name="secretProvider" ref="secretProvider"/>
+        <property name="safeCommands" value="100"/>
+    </bean>-->
+    
+    <bean id="serverConfig" class="com.cwa.httpserver.GameServerConfig">
+        <property name="serverPort" value="8081"/>
+        <property name="messageSuffixes" value="Request"/>
+        <property name="messagePackages" value="com.cwa"/>
+        <property name="actionSuffixes" value="Action"/>
+        <property name="actionPackages" value="com.cwa"/>
+        <!--<property name="actionDispatcher" ref="actionDispatcher"/>-->
+    </bean>
+    
+    <bean id="gameServer" class="com.cwa.httpserver.GameJettyServer">
+        <constructor-arg ref="serverConfig"/>
+    </bean>
+    
+</beans>
